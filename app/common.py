@@ -18,16 +18,6 @@ def format_tags(arr):
     return new_arr
 
 
-def format_m3u8(data):
-    new_data = str(data, encoding='utf-8')
-    video_server = '//' + config.app_config.get('SERVER_URL')+'/proxy/media/'
-    it = re.finditer(".+\.ts", new_data)
-    for match in it:
-        new_data = new_data.replace(
-            match.group(), video_server + match.group())
-    return new_data
-
-
 def get_page_data(data_count, page_limit, page, search):
     html = '<ul class="pagination pagination-lg">'
     page_count = int(data_count / page_limit) + 1
@@ -55,6 +45,16 @@ def get_page_data(data_count, page_limit, page, search):
     html = html + page_next_html + lis + page_last_html
     html = html + "</ul>"
     return html
+
+
+def format_m3u8(data):
+    new_data = str(data, encoding='utf-8')
+    video_server = '//' + config.app_config.get('SERVER_URL')+'/proxy/media/'
+    it = re.finditer(".+\.ts", new_data)
+    for match in it:
+        new_data = new_data.replace(
+            match.group(), video_server + match.group())
+    return new_data
 
 
 def info_msg(code, msg=''):
