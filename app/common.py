@@ -20,10 +20,11 @@ def format_tags(arr):
 
 def format_m3u8(data):
     new_data = str(data, encoding='utf-8')
-    video_server = 'https://media.scooky.com/proxy/media/'
+    video_server = '//' + config.app_config.get('SERVER_URL')+'/proxy/media/'
     it = re.finditer(".+\.ts", new_data)
     for match in it:
-        new_data = new_data.replace(match.group(), video_server + match.group())
+        new_data = new_data.replace(
+            match.group(), video_server + match.group())
     return new_data
 
 

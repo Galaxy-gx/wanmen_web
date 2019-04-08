@@ -7,7 +7,7 @@ from collections import OrderedDict
 import models
 import common
 from sms import cache, passport
-from flask import Flask, Response, request, render_template, redirect, url_for
+from flask import Flask, Response, request, render_template, redirect, url_for, jsonify
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_bootstrap import Bootstrap
 import config
@@ -27,23 +27,24 @@ sms = passport()
 @app.route('/list/page/<int:page>', methods=['GET'])
 @login_required
 def get_list(page=1):
-    model = all_courses_table()
+    instance = models.all_courses_table()
     search = request.args.get('search', '')
     page_limit = 32
-    tags = common.format_tags(model.get_tag_list())
+    tags = common.format_tags(instance.get_tag_list())
     skip_num = 0
     if page > 1:
         skip_num = page_limit * (page - 1)
 
-    courses_data = model.search(search).skip(skip_num).limit(page_limit)
-    data_count = model.count
+    courses_data = instance.search(
+        search).skip(skip_num).limit(page_limit)
+    data_count = instance.count
+    print(data_count, page_limit, page, search)
     pagination = common.get_page_data(data_count, page_limit, page, search)
     courses = []
     for i in courses_data:
-        i['bigImage'] = str(i.get('bigImage')).replace('https://imgs.wanmen.org/',
-                                                       'https://media.scooky.com/proxy/img/')
+        i['bigImage'] = str(i.get('bigImage')).replace(
+            'https://imgs.wanmen.org/', "//"+config.app_config.get('SERVER_URL')+'/proxy/img/')
         courses.append(i)
-
     return render_template('list.html', courses=courses, tags=tags[:105], pagination=pagination, search=search)
 
 
@@ -56,8 +57,9 @@ def get_detail(url_info):
     if len(path_info) > 1 and path_info[1] == 'children_id' and len(path_info[2]) == 24:
         children_id = path_info[2]
 
-    course = all_courses_table().collection.find_one({'_id': id})
-    class_data = m3u8_data_table().get_class_data(id)
+    course = models.all_courses_table().collection.find_one({
+        '_id': id})
+    class_data = models.m3u8_data_table().get_class_data(id)
     detail_data = OrderedDict()
     for item in class_data:
         is_download = 0
@@ -67,26 +69,31 @@ def get_detail(url_info):
         if item.get("lectures_id") not in detail_data.keys():
             detail_data[item.get("lectures_id")] = OrderedDict()
 
-        detail_data[item.get("lectures_id")]['lectures_name'] = item.get("lectures_name")
+        detail_data[item.get("lectures_id")]['lectures_name'] = item.get(
+            "lectures_name")
         if 'children_data' not in detail_data[item.get("lectures_id")]:
-            detail_data[item.get("lectures_id")]['children_data'] = OrderedDict()
+            detail_data[item.get("lectures_id")
+                        ]['children_data'] = OrderedDict()
 
         if item.get("children_m3u8"):
             is_download = 1
 
         if item.get("_id") not in detail_data[item.get("lectures_id")]['children_data'].keys():
-            detail_data[item.get("lectures_id")]['children_data'][item.get("_id")] = OrderedDict()
+            detail_data[item.get("lectures_id")]['children_data'][item.get(
+                "_id")] = OrderedDict()
 
-        detail_data[item.get("lectures_id")]['children_data'][item.get("_id")]['name'] = item.get("children_name")
-        detail_data[item.get("lectures_id")]['children_data'][item.get("_id")]['is_download'] = is_download
+        detail_data[item.get("lectures_id")]['children_data'][item.get(
+            "_id")]['name'] = item.get("children_name")
+        detail_data[item.get("lectures_id")]['children_data'][item.get(
+            "_id")]['is_download'] = is_download
 
     return render_template('detail.html', id=id, course=course, detail_data=detail_data, play_id=children_id)
 
 
 @app.route('/media/<children_id>', methods=['GET'])
-@login_required
 def get_media(children_id):
-    m3u8_data = m3u8_data_table().collection.find_one({'_id': children_id}, {"children_m3u8": 1})
+    m3u8_data = models.m3u8_data_table().collection.find_one(
+        {'_id': children_id}, {"children_m3u8": 1})
     if not m3u8_data.get("children_m3u8"):
         return "media is not found"
     m3u8_list = common.format_m3u8(m3u8_data.get("children_m3u8"))
@@ -105,21 +112,22 @@ def login():
 
         if not mobile or not sms_code:
             return common.info_msg(101)
-        elif not User(mobile).check_user():
+        elif not models.User(mobile).check_user():
             return common.info_msg(102)
         else:
             login_flag, msg = sms.verfiy_sms(mobile, sms_code)
 
         if login_flag:
-            model = User(mobile)
+            model = models.User(mobile)
             if config.app_config.get('OPEN_REGISTER') == '1':
                 model.insert_user()
             model.login_log(request)
             user_json = model.find_user()
             if remeber == 'true':
-                login_user(User(user_json.get('mobile')), True, datetime.timedelta(weeks=1))
+                login_user(models.User(user_json.get('mobile')),
+                           True, datetime.timedelta(weeks=1))
             else:
-                login_user(User(user_json.get('mobile')))
+                login_user(models.User(user_json.get('mobile')))
             arr = parse_qs(urlsplit(request.form.get("url")).query)
             next_url = ''
             if 'next' in arr.keys():
@@ -136,13 +144,18 @@ def send_sms():
     mobile = request.form.get('mobile', '')
     code = request.form.get('code', '')
     if mobile and code:
-        if User(mobile).check_user():
+        if models.User(mobile).check_user():
             ret, msg = sms.send_sms(mobile, code)
             return common.info_msg(ret, msg)
         else:
             return common.info_msg(102)
     else:
         return common.info_msg(101)
+
+
+@app.route('/get_server', methods=['GET'])
+def get_server():
+    return jsonify({'server_url': config.app_config.get('SERVER_URL')})
 
 
 @app.route('/logout')
@@ -160,9 +173,9 @@ def seccode():
 
 @login_manager.user_loader
 def load_user(user_id):
-    user_json = User(user_id).find_user()
-    return User(user_json.get('mobile'))
+    user_json = models.User(user_id).find_user()
+    return models.User(user_json.get('mobile'))
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', debug=True, port=80)

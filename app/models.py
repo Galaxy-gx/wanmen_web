@@ -12,25 +12,28 @@ client = MongoClient(config.app_config.get('MONGO_CONFIG'), connect=False)
 db = client['wanmen_ts_m3u8']
 
 
-class all_courses_table:
+class all_courses_table(object):
     count = 0
     collection = db.all_courses
 
     def get_tag_list(self):
         pipeline = [
             {"$unwind": "$tag"},
-            {"$project": {"tag": 1, "teacherName": 1, "difference": {"$eq": ["$tag", "$teacherName"]}}},
+            {"$project": {"tag": 1, "teacherName": 1,
+                          "difference": {"$eq": ["$tag", "$teacherName"]}}},
             {"$match": {"difference": False}},
             {"$group": {"_id": "$tag", "count": {"$sum": 1}}},
             {"$sort": SON([("count", -1), ("_id", -1)])}
         ]
         tags = list(self.collection.aggregate(pipeline))
+        self.count = 100
         return tags
 
     def search(self, keywork):
         query = {}
         if keywork:
-            query = {"$or": [{'name': {'$regex': str(keywork)}}, {'tag': {'$regex': str(keywork)}}]}
+            query = {"$or": [{'name': {'$regex': str(keywork)}}, {
+                'tag': {'$regex': str(keywork)}}]}
 
         self.count = self.collection.count_documents(query)
         return self.collection.find(query).sort([['downloadAction', -1], ['likes', -1]])

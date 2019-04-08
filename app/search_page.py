@@ -97,19 +97,22 @@ def get_children_data(num, data, class_id, class_name, lectures_id, lectures_nam
     process_count = 10
     children = {}
     flag = 1
-    cut_data = [data[i:i + process_count] for i in range(0, len(data), process_count)]
+    cut_data = [data[i:i + process_count]
+                for i in range(0, len(data), process_count)]
     for i in range(len(cut_data)):
         p = Pool(process_count)
         for k in range(len(cut_data[i])):
             prefix = "%s.%d_" % (num, i * process_count + k + 1)
             children_id = cut_data[i][k]['id']
-            children_name = prefix + cut_data[i][k]['name'].replace('/', '').replace('_', '')
+            children_name = prefix + \
+                cut_data[i][k]['name'].replace('/', '').replace('_', '')
             children[children_id] = {}
             children[children_id]['name'] = children_name
             children[children_id]['hls_url'] = ''
             children[children_id]['method'] = 0
             children[children_id]['video_ts'] = ''
-            p.apply_async(process_get_item_ts, args=(queue, children_id, lectures_url + children_id))
+            p.apply_async(process_get_item_ts, args=(
+                queue, children_id, lectures_url + children_id))
 
         p.close()
         p.join()
@@ -133,17 +136,20 @@ def get_children_data(num, data, class_id, class_name, lectures_id, lectures_nam
 
 def get_lectures_data(class_id, class_name, response):
     downloadAction = 1
-    courses_url = "https://api.wanmen.org/4.0/content/courses/" + response[i]['id']
+    courses_url = "https://api.wanmen.org/4.0/content/courses/" + \
+        response[i]['id']
     courses_data = get_courses_data(courses_url)
 
     for n in range(len(courses_data)):
         num = str(n + 1)
         print(
             "%s %s %s/%d count:%d" % (
-                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), class_name, num, len(courses_data),
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()
+                              ), class_name, num, len(courses_data),
                 len(courses_data[n]['children'])))
         lectures_id = courses_data[n]['id']
-        lectures_name = num + '_' + courses_data[n]['name'].replace('/', '').replace('_', '')
+        lectures_name = num + '_' + \
+            courses_data[n]['name'].replace('/', '').replace('_', '')
 
         downloadAction, children_data = get_children_data(num, courses_data[n]['children'], class_id, class_name,
                                                           lectures_id, lectures_name)
@@ -158,7 +164,8 @@ total, create_num, update_num, continue_num = 0, 0, 0, 0
 while flag:
     item_num = 0
     if page >= 2:
-        url = "https://api.wanmen.org/4.0/content/courses?limit=%d&page=%d" % (limit, page)
+        url = "https://api.wanmen.org/4.0/content/courses?limit=%d&page=%d" % (
+            limit, page)
     else:
         url = "https://api.wanmen.org/4.0/content/courses?limit=%d" % limit
     page = page + 1
@@ -188,7 +195,7 @@ while flag:
             if db_item.get('videoCount') == 'None' or db_item.get('videoCount') == None:
                 db_item_videoCount = 0
             else:
-                db_item_videoCount = int(db_item.get('videoCount',0))
+                db_item_videoCount = int(db_item.get('videoCount', 0))
 
             if response_videoCount == db_item_videoCount:
                 tmp_str = 'continue'
@@ -201,11 +208,13 @@ while flag:
                 collection.update_one({'_id': _id}, update_data(course))
                 update_num = update_num + 1
             else:
-                tmp_str = '%s error %s/%s' % (class_name, response_videoCount, db_item_videoCount)
+                tmp_str = '%s error %s/%s' % (class_name,
+                                              response_videoCount, db_item_videoCount)
 
         total = total + 1
         print('%s %s page:%d current:%d %s' % (
             time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), class_name, page - 1, i, tmp_str))
 
 today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-print("%s total:%d create_num:%d update_num:%d continue_num:%d" % (today, total, create_num, update_num, continue_num))
+print("%s total:%d create_num:%d update_num:%d continue_num:%d" %
+      (today, total, create_num, update_num, continue_num))

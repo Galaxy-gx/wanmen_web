@@ -1,6 +1,19 @@
 
-$(function(){
-    var server = '//media.scooky.com/media/'
+$(function () {
+    let server;
+    if (sessionStorage.getItem('information')) {
+        server = JSON.parse(sessionStorage.getItem('information')).server_media;
+        loadStream(server + $(".inner-scroll a.active").attr('id'));
+    } else {
+        fetch('/get_server')
+            .then(r => r.json())
+            .then(info => {
+                info.server_media = '//' + info.server_url + '/media/';
+                let url = info.server_media + $(".inner-scroll a.active").attr('id');
+                sessionStorage.setItem('information', JSON.stringify(info))
+                loadStream(url);
+            });
+    }
 
     function loadStream(url) {
         if (!Hls.isSupported() && video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -28,8 +41,6 @@ $(function(){
         }
     }
 
-    var url = server + $(".inner-scroll a.active").attr('id')
-    loadStream(url)
     $(".inner-scroll a.list-group-item:not(.disabled)").click(function () {
         $(".inner-scroll a.list-group-item").removeClass('active')
         $(this).addClass('active')
