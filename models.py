@@ -8,7 +8,7 @@ import time
 import json
 import config
 
-client = MongoClient(config.app_config.get('MONGO_CONFIG'))
+client = MongoClient(config.app_config.get('MONGO_CONFIG'), connect=False)
 db = client['wanmen_ts_m3u8']
 
 
@@ -33,7 +33,7 @@ class all_courses_table:
             query = {"$or": [{'name': {'$regex': str(keywork)}}, {'tag': {'$regex': str(keywork)}}]}
 
         self.count = self.collection.count_documents(query)
-        return self.collection.find(query)
+        return self.collection.find(query).sort([['downloadAction', -1], ['likes', -1]])
 
 
 class m3u8_data_table:
@@ -43,7 +43,7 @@ class m3u8_data_table:
         return self.collection.find({'class_id': class_id},
                                     {"_id": 1, "lectures_id": 1, "lectures_name": 1, "children_name": 1,
                                      "children_m3u8": 1}).sort(
-            [["children_name", 1]]).collation({"locale": "en_US", "numericOrdering": True})
+            [["children_name", 1]]).collation({"locale": "zh", "numericOrdering": True})
 
 
 class User(UserMixin):

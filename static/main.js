@@ -1,6 +1,6 @@
 
 $(function(){
-    var server = 'http://127.0.0.1:5000/media/'
+    var server = '//media.scooky.com/media/'
 
     function loadStream(url) {
         if (!Hls.isSupported() && video.canPlayType('application/vnd.apple.mpegurl')) {
