@@ -102,7 +102,7 @@ def login():
             return common.info_msg(102)
         else:
             # login_flag = 1
-            login_flag = sms.verfiy_sms(mobile, sms_code)
+            login_flag, msg = sms.verfiy_sms(mobile, sms_code)
 
         if login_flag:
             model = User(mobile)
@@ -120,7 +120,7 @@ def login():
 
             return common.info_msg(0, next_url)
         else:
-            return common.info_msg(103)
+            return common.info_msg(103, msg)
     return render_template('login.html')
 
 
