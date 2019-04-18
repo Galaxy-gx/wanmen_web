@@ -69,7 +69,7 @@ class passport:
         if search_obj:
             login_flag = 1
         else:
-            arr = re.findall('<br />([^<.]*)<br />', content)
+            arr = re.findall('<br />([^<.]*)<br />', content.text)
             if len(arr) >= 1:
                 msg = arr[0]
         return login_flag, msg
