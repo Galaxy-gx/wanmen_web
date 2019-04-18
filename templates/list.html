@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+<style>
+</style>
+{% block page_content %}
+<div class="jumbotron">
+    <div class="container">
+        <ul class="nav nav-pills">
+            <li role="presentation" {% if search == '' %}  class="active" {% endif %}><a href="/list">全部</a></li>
+            {% for tag in tags %}
+            <li role="presentation" {% if search == tag %}  class="active" {% endif %}><a href="?search={{tag}}">{{tag}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="row" id="list_page">
+    {% for i in courses %}
+    <div class="col-sm-6 col-md-3">
+        <div class="thumbnail bigimg-wrap" title="{{i.name}}">
+            <a href="/detail/{{i._id}}" target="_blank"><img class="bigimg" src="{{i.bigImage}}" alt="{{i.name}}"></a>
+            <div class="caption">
+                <h4 class="text-overflow"><a href="/detail/{{i._id}}" target="_blank">{{i.name}}</a></h4>
+                <p>
+                    <small>{% if i.downloadAction == 1 %} <span class="glyphicon glyphicon-check"></span> {% endif
+                        %} 视频:{{i.videoCount}} ¥{{i.price}} <span
+                                class="glyphicon glyphicon-heart">{{i.likes}}</span> {{i.status}}
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+<div class="row text-center">
+    {{pagination|safe}}
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+
+.inner-scroll {
+    height: 600px;
+    overflow: scroll;
+}
+
+.inner-scroll .sidebar_nav {
+    text-indent: 1em;
+}
+
+.inner-scroll .list-group-item {
+    border: 0;
+}
+
+
+#list_page .bigimg-wrap {
+    padding-top: 55%;
+    position: relative;
+}
+
+#list_page .text-overflow {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#list_page .bigimg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}

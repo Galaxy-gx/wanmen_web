@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('.static', filename='main.js')}}"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+{% endblock %}
+
+
+{% block page_content %}
+<div class="row">
+    <div class="col-xs-12 col-sm-9">
+        <div class="row">
+            <video controls="controls" autoplay="autoplay" width="100%" id="video">
+                <p class="warning">Your browser does not support HTML5 video.</p>
+            </video>
+        </div>
+        <div class="row">
+            <dl class="dl-horizontal">
+                <dt>name</dt>
+                <dd>{{course.name}}</dd>
+                <dt>description</dt>
+                <dd>{{course.description}}
+                </dd>
+                <dt>tag</dt>
+                <dd>{{course.tag}}</dd>
+                <dt>teacherName</dt>
+                <dd>{{course.teacherName}}</dd>
+                <dt>status</dt>
+                <dd>{{course.status}}</dd>
+                <dt>createdAt</dt>
+                <dd>{{course.createdAt}}</dd>
+                <dt>updatedAt</dt>
+                <dd>{{course.updatedAt}}</dd>
+                <dt>finishedAt</dt>
+                <dd>{{course.finishedAt}}</dd>
+                <dt>downloadAction</dt>
+                <dd>{{course.downloadAction}}</dd>
+            </dl>
+        </div><!--/row-->
+    </div><!--/.col-xs-12.col-sm-9-->
+
+    <div class="col-xs-6 col-sm-3">
+        <div class="list-group">
+            <h4 class="text-center">{{course.name}}</h4>
+            <ul class="list-unstyled inner-scroll">
+                {% for lectures_id,lectures_data in detail_data.items() %}
+                <li class="list-group-item">{{lectures_data.lectures_name}}</li>
+                {% if "children_data" in lectures_data %}
+                <ol class="list-unstyled sidebar_nav">
+                    {% for children_id, children_data in lectures_data.get('children_data').items() %}
+                    <li><a id="{{children_id}}" data-class_id="{{id}}"
+                           class="list-group-item {% if play_id == children_id %} active {% endif %} {% if children_data.is_download == 0 %} disabled {% endif %}">{{children_data.name}}</a>
+                    </li>
+                    {% endfor %}
+                </ol>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

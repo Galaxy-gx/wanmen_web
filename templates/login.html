@@ -1,0 +1,142 @@
+{% extends "bootstrap/base.html" %}
+
+{% block styles %}
+{{super()}}
+<style>
+    .alert {
+        display: none;
+        position: absolute;
+        width: 100%;
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+{% block scripts %}
+{{super()}}
+<script src="https://cdn.bootcss.com/jquery.form/4.2.2/jquery.form.min.js"></script>
+<script>
+    $(function () {
+        function check_input(obj) {
+            if (obj.val() === '') {
+                alert_info('alert-danger', obj.attr('id') + ' 不能为空')
+                return false
+            }
+            return obj.val()
+
+        }
+
+        $("#sned_sms").bind({
+            click: function () {
+                var mobile = check_input($('#mobile'))
+                var code = check_input($('#code'))
+                if (mobile === false || code === false) {
+                    return false
+                }
+                $.post('send_sms', {
+                    "mobile": mobile,
+                    "code": code
+                }, function (result) {
+                    if (result.code === 0) {
+                        alert_info('alert-success', result.msg)
+                    } else {
+                        alert_info('alert-danger', result.msg)
+                    }
+                });
+            }
+        });
+        $('#seccode').click(function () {
+            $(this).attr('src', 'seccode?' + Math.random())
+        })
+
+        $("form").submit(function () {
+            var mobile = check_input($('#mobile'))
+            var sms = check_input($('#sms'))
+            var remeber = $('#remeber').prop('checked')
+            var url = window.location.href
+            if (mobile === false || sms === false) {
+                return false
+            }
+            $.post('login', {
+                "mobile": mobile,
+                "sms": sms,
+                "remeber": remeber,
+                "url": url,
+            }, function (result) {
+                if (result.code !== 0) {
+                    alert_info('alert-danger', result.msg)
+                } else {
+                    url = '/list'
+                    if (result.msg !== '操作成功') {
+                        url = result.msg
+                    }
+                    location.replace(url)
+                }
+            });
+            return false
+        });
+
+
+        function alert_info(class_name, msg) {
+            $('.alert').text(msg).show().removeClass('alert-success alert-danger')
+            $('.alert').addClass(class_name)
+            $('.alert').delay(1500).fadeOut()
+        }
+    })
+</script>
+{% endblock %}
+{% block content %}
+<div class="alert text-center"></div>
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Media</a>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <form class="form-horizontal" method="post">
+        <div class="form-group">
+            <label for="mobile" class="col-sm-2 control-label">mobile</label>
+            <div class="col-sm-3">
+                <input type="tel" class="form-control" id="mobile" placeholder="mobile" maxlength="11">
+            </div>
+            <span class="help-block" id="mobile_help"></span>
+
+        </div>
+        <div class="form-group">
+            <label for="code" class="col-sm-2 control-label">code</label>
+            <div class="col-sm-1">
+                <input type="text" class="form-control" id="code" placeholder="code" maxlength="4">
+
+            </div>
+            <div class="col-sm-2"><img src="/seccode" class="img-rounded" id="seccode">
+                <button type="button" class="btn btn-default" id="sned_sms">发送验证码</button>
+            </div>
+            <span class="help-block" id="code_help"></span>
+
+        </div>
+        <div class="form-group">
+            <label for="sms" class="col-sm-2 control-label">sms</label>
+            <div class="col-sm-2">
+                <input type="text" class="form-control" id="sms" placeholder="sms" maxlength="6">
+            </div>
+            <span class="help-block" id="sms_help"></span>
+
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="remeber" checked id="remeber"> Remember me
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">Sign in</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

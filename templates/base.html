@@ -1,0 +1,39 @@
+{% extends "bootstrap/base.html" %}
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='base.css')}}">
+{% endblock %}
+
+{% block title %}Media{% endblock %}
+{% block navbar %}
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/list">Media</a>
+        </div>
+        <div id="navbar">
+            <form class="navbar-form navbar-left">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search" value="{{search}}">
+                    <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">Search</button>
+              </span>
+                </div>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/logout">{{ current_user.mobile }} logout</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% block page_content %} {% endblock %}
+    <hr>
+    <footer>
+        <p>© 2019 Scooky, Inc.</p>
+    </footer>
+</div>
+{% endblock %}
