@@ -6,6 +6,7 @@ load_dotenv(find_dotenv())
 app_config = {
     'SECRET_KEY': os.environ.get('SECRET_KEY'),
     'MONGO_CONFIG': os.environ.get('MONGO_CONFIG'),
+    'OPEN_REGISTER': os.environ.get('OPEN_REGISTER'),
 }
 
 app_msg = {
