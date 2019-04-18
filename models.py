@@ -61,8 +61,9 @@ class User(UserMixin):
 
     def check_user(self):
         flag = config.app_config.get('OPEN_REGISTER')
-        if flag or self.find_user():
-            flag = True
+        if not flag:
+            if self.find_user():
+                flag = True
 
         return flag
 

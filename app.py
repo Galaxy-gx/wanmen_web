@@ -106,7 +106,8 @@ def login():
 
         if login_flag:
             model = User(mobile)
-            model.insert_user()
+            if config.app_config.get('OPEN_REGISTER'):
+                model.insert_user()
             model.login_log(request)
             user_json = model.find_user()
             if remeber == 'true':
