@@ -8,8 +8,8 @@ import time
 import json
 import config
 
-conn = MongoClient(config.app_config.get('MONGO_CONFIG'))
-db = conn.wanmen_ts_m3u8
+client = MongoClient(config.app_config.get('MONGO_CONFIG'))
+db = client['wanmen_ts_m3u8']
 
 
 class all_courses_table:
@@ -60,8 +60,8 @@ class User(UserMixin):
             raise NotImplementedError('No `id` attribute - override `get_id`')
 
     def check_user(self):
-        flag = True
-        if self.find_user():
+        flag = config.app_config.get('OPEN_REGISTER')
+        if flag or self.find_user():
             flag = True
 
         return flag

@@ -41,7 +41,7 @@ class passport:
         }
         d = {"mobile": mobile, "dataType": "json", "type": "regist", "checkcode": code}
         content = requests.post('https://passport.9you.com/sendmobilecode.php', data=d, headers=headers).json()
-        return int(content.ret), content.msg
+        return int(content.get('ret')), content.get('msg')
 
     def verfiy_sms(self, mobile, sms):
         headers = {
