@@ -20,6 +20,7 @@ login_manager.login_view = "login"
 sms = sms.passport()
 
 
+@app.route('/')
 @app.route('/list/', defaults={'page': 1})
 @app.route('/list/page/<int:page>', methods=['GET'])
 @login_required
