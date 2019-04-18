@@ -24,7 +24,7 @@ sms = sms.passport()
 @app.route('/list/', defaults={'page': 1})
 @app.route('/list/page/<int:page>', methods=['GET'])
 @login_required
-def get_list(page):
+def get_list(page=1):
     model = all_courses_table()
     search = request.args.get('search', '')
     page_limit = 32
@@ -159,4 +159,4 @@ def load_user(user_id):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
