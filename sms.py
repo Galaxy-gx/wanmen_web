@@ -61,9 +61,9 @@ class passport:
 
         d = {"username": mobile, "password": "fKWKWd2m2nrMXQf", "code": sms, "realname": '%E7%A8%8B%E5%85%86%E7%A5%A5',
              'idcard': '34082419901212323x', 'nickname': '123123', 'protocal': 1, 'x': 46, 'y': 17}
-        content = requests.post('https://passport.9you.com/mobile_regist_do.php', data=d, headers=headers)
+        content = requests.post('https://passport.9you.com/mobile_regist_do.php', data=d, headers=headers).text
         login_flag = 0
-        search_obj = re.search('昵称中含有禁用字符', content.text())
+        search_obj = re.search('昵称中含有禁用字符', content)
         if search_obj:
             login_flag = 1
         return login_flag
