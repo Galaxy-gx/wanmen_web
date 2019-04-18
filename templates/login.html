@@ -38,11 +38,9 @@
                 }, function (result) {
                     if (result.code === 0) {
                         alert_info('alert-success', result.msg)
-                    } else if (result.code === 4){
-                        alert_info('alert-danger', result.msg)
-                        $('#seccode').trigger('click')
                     } else {
                         alert_info('alert-danger', result.msg)
+                        $('#seccode').trigger('click')
                     }
                 });
             }
@@ -67,6 +65,7 @@
             }, function (result) {
                 if (result.code !== 0) {
                     alert_info('alert-danger', result.msg)
+                    $('#seccode').trigger('click')
                 } else {
                     url = '/list'
                     if (result.msg !== '操作成功') {
