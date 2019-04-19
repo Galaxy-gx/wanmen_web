@@ -34,9 +34,15 @@ def get_list(page=1):
     if page > 1:
         skip_num = page_limit * (page - 1)
 
-    courses = model.search(search).skip(skip_num).limit(page_limit)
+    courses_data = model.search(search).skip(skip_num).limit(page_limit)
     data_count = model.count
     pagination = common.get_page_data(data_count, page_limit, page, search)
+    courses = []
+    for i in courses_data:
+        i['bigImage'] = str(i.get('bigImage')).replace('https://imgs.wanmen.org/',
+                                                       'https://media.scooky.com/proxy/img/')
+        courses.append(i)
+
     return render_template('list.html', courses=courses, tags=tags[:105], pagination=pagination, search=search)
 
 
