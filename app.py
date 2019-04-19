@@ -102,13 +102,11 @@ def login():
         remeber = request.form.get('remeber', '')
         sms_code = request.form.get('sms', '')
 
-        login_flag = 0
         if not mobile or not sms_code:
             return common.info_msg(101)
         elif not User(mobile).check_user():
             return common.info_msg(102)
         else:
-            # login_flag = 1
             login_flag, msg = sms.verfiy_sms(mobile, sms_code)
 
         if login_flag:
@@ -166,4 +164,4 @@ def load_user(user_id):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -24,6 +24,7 @@ class passport:
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
         self.PHPSESSID = arr[0]
+        print(self.PHPSESSID)
         return content.content
 
     def send_sms(self, mobile, code):
@@ -41,9 +42,11 @@ class passport:
             'Connection': 'keep-alive',
             'Referer': 'https://passport.9you.com/mobile_regist.php',
         }
+        print(self.PHPSESSID)
         d = {"mobile": mobile, "dataType": "json", "type": "regist", "checkcode": code}
-        content = requests.post('https://passport.9you.com/sendmobilecode.php', data=d, headers=headers).json()
-        return int(content.get('ret')), content.get('msg')
+        # content = requests.post('https://passport.9you.com/sendmobilecode.php', data=d, headers=headers).json()
+        return int(4), ''
+        # return int(content.get('ret')), content.get('msg')
 
     def verfiy_sms(self, mobile, sms):
         headers = {
