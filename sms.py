@@ -10,7 +10,6 @@ class passport:
     ua = generate_user_agent()
 
     def seccode(self, mobile, rand_num):
-        print()
         headers = {
             'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -26,7 +25,7 @@ class passport:
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        cache.set(mobile,{arr[0]})
+        cache.set(mobile, {'id': arr[0]})
         print(mobile + arr[0])
         return content.content
 
