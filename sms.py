@@ -26,7 +26,7 @@ class passport:
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
 
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        PHPSESSID = arr[0].decode('utf8')
+        PHPSESSID = str(arr[0]).encode('utf-8')
         cache.set(mobile, {'id': PHPSESSID})
         print(mobile + arr[0])
         return content.content
