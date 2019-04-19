@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
 import requests
 import re
 from user_agent import generate_user_agent
@@ -26,12 +29,7 @@ class passport:
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
 
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        PHPSESSID = arr[0]
-        print(type(arr[0]))
-        print(type(PHPSESSID))
-        print(type(mobile))
-        print(type({'id': PHPSESSID}))
-        cache.set(mobile, {'id': PHPSESSID})
+        cache.set(mobile, arr[0])
         print(mobile + arr[0])
         return content.content
 
