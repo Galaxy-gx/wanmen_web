@@ -27,6 +27,9 @@ class passport:
 
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
         PHPSESSID = str(arr[0]).encode('utf-8')
+        print(type(PHPSESSID))
+        print(type(mobile))
+        print(type({'id': PHPSESSID}))
         cache.set(mobile, {'id': PHPSESSID})
         print(mobile + arr[0])
         return content.content
