@@ -46,7 +46,7 @@
             }
         });
         $('#seccode').click(function () {
-            $(this).attr('src', 'seccode?' + Math.random())
+            $(this).attr('src', 'seccode?' + Math.random() +'&mobile=' +$('#mobile').val())
         })
 
         $("form").submit(function () {

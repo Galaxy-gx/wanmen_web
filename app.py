@@ -154,7 +154,8 @@ def logout():
 @app.route('/seccode', methods=['GET', 'POST'])
 def seccode():
     rand_num = request.args.get('rand_num', '')
-    return Response(sms.seccode(rand_num), content_type='image/png')
+    mobile = request.args.get('mobile', '')
+    return Response(sms.seccode(mobile,rand_num), content_type='image/png')
 
 
 @login_manager.user_loader

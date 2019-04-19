@@ -1,13 +1,16 @@
 import requests
 import re
 from user_agent import generate_user_agent
+from uwsgi_cache.cache import CacheManager
+
+cache = CacheManager("media_user_cache", 120)
 
 
 class passport:
-    PHPSESSID = ''
     ua = generate_user_agent()
 
-    def seccode(self, rand_num):
+    def seccode(self, mobile, rand_num):
+        mobile = str(mobile)
         headers = {
             'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -23,11 +26,13 @@ class passport:
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        self.PHPSESSID = arr[0]
-        print(self.PHPSESSID)
+        cache.set("PHPSESSID" + mobile, mobile + str(arr[0]))
+        print(mobile + str(arr[0]))
         return content.content
 
     def send_sms(self, mobile, code):
+        PHPSESSID = cache.get("PHPSESSID" + mobile)
+        print(PHPSESSID)
         headers = {
             'Host': 'passport.9you.com',
             'Origin': 'https://passport.9you.com',
@@ -38,17 +43,17 @@ class passport:
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Cache-Control': 'no-cache',
             'X-Requested-With': 'XMLHttpRequest',
-            'Cookie': 'PHPSESSID=' + self.PHPSESSID,
+            'Cookie': 'PHPSESSID=' + PHPSESSID,
             'Connection': 'keep-alive',
             'Referer': 'https://passport.9you.com/mobile_regist.php',
         }
-        print(self.PHPSESSID)
         d = {"mobile": mobile, "dataType": "json", "type": "regist", "checkcode": code}
         # content = requests.post('https://passport.9you.com/sendmobilecode.php', data=d, headers=headers).json()
         return int(4), ''
         # return int(content.get('ret')), content.get('msg')
 
     def verfiy_sms(self, mobile, sms):
+        PHPSESSID = cache.get("PHPSESSID" + mobile)
         headers = {
             'Host': 'passport.9you.com',
             'Connection': 'keep-alive',
@@ -62,7 +67,7 @@ class passport:
             'Referer': 'https://passport.9you.com/mobile_regist.php',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Cookie': 'PHPSESSID=' + self.PHPSESSID,
+            'Cookie': 'PHPSESSID=' + PHPSESSID,
         }
 
         d = {"username": mobile, "password": "fKWKWd2m2nrMXQf", "code": sms, "realname": '%E7%A8%8B%E5%85%86%E7%A5%A5',
