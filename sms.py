@@ -18,6 +18,7 @@ class passport:
             'Pragma': 'no-cache',
             'Referer': 'https://passport.9you.com/mobile_regist.php',
             'User-Agent': self.ua,
+            'Origin': 'https://passport.9you.com',
         }
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
@@ -27,6 +28,7 @@ class passport:
 
     def send_sms(self, mobile, code):
         headers = {
+            'Host': 'passport.9you.com',
             'Origin': 'https://passport.9you.com',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
@@ -45,6 +47,7 @@ class passport:
 
     def verfiy_sms(self, mobile, sms):
         headers = {
+            'Host': 'passport.9you.com',
             'Connection': 'keep-alive',
             'Pragma': 'no-cache',
             'Cache-Control': 'no-cache',

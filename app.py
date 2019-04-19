@@ -10,6 +10,7 @@ import common
 import sms
 import datetime
 from urllib.parse import urlsplit, parse_qs
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.secret_key = config.app_config.get('SECRET_KEY')
@@ -50,7 +51,7 @@ def get_detail(url_info):
 
     course = all_courses_table().collection.find_one({'_id': id})
     class_data = m3u8_data_table().get_class_data(id)
-    detail_data = {}
+    detail_data = OrderedDict()
     for item in class_data:
         is_download = 0
         if not children_id:
