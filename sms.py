@@ -24,9 +24,10 @@ class passport:
         }
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
-        content.encoding = 'utf-8'
+
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        cache.set(mobile, {'id': arr[0]})
+        PHPSESSID = arr[0].decode('utf8')
+        cache.set(mobile, {'id': PHPSESSID})
         print(mobile + arr[0])
         return content.content
 
