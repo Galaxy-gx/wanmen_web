@@ -10,6 +10,7 @@ class passport:
     ua = generate_user_agent()
 
     def seccode(self, mobile, rand_num):
+        print()
         headers = {
             'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -25,12 +26,12 @@ class passport:
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        cache.set(str("PHPSESSID" + mobile), str(mobile + arr[0]))
-        print(mobile + str(arr[0]))
+        cache.set(mobile,{arr[0]})
+        print(mobile + arr[0])
         return content.content
 
     def send_sms(self, mobile, code):
-        PHPSESSID = cache.get(str("PHPSESSID" + mobile))
+        PHPSESSID = cache.get(mobile)
         print(PHPSESSID)
         headers = {
             'Host': 'passport.9you.com',
@@ -52,7 +53,7 @@ class passport:
         # return int(content.get('ret')), content.get('msg')
 
     def verfiy_sms(self, mobile, sms):
-        PHPSESSID = cache.get(str("PHPSESSID" + mobile))
+        PHPSESSID = cache.get(mobile)
         headers = {
             'Host': 'passport.9you.com',
             'Connection': 'keep-alive',
