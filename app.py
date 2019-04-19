@@ -64,17 +64,17 @@ def get_detail(url_info):
             children_id = item.get("_id")
 
         if item.get("lectures_id") not in detail_data.keys():
-            detail_data[item.get("lectures_id")] = {}
+            detail_data[item.get("lectures_id")] = OrderedDict()
 
         detail_data[item.get("lectures_id")]['lectures_name'] = item.get("lectures_name")
         if 'children_data' not in detail_data[item.get("lectures_id")]:
-            detail_data[item.get("lectures_id")]['children_data'] = {}
+            detail_data[item.get("lectures_id")]['children_data'] = OrderedDict()
 
         if item.get("children_m3u8"):
             is_download = 1
 
         if item.get("_id") not in detail_data[item.get("lectures_id")]['children_data'].keys():
-            detail_data[item.get("lectures_id")]['children_data'][item.get("_id")] = {}
+            detail_data[item.get("lectures_id")]['children_data'][item.get("_id")] = OrderedDict()
 
         detail_data[item.get("lectures_id")]['children_data'][item.get("_id")]['name'] = item.get("children_name")
         detail_data[item.get("lectures_id")]['children_data'][item.get("_id")]['is_download'] = is_download
