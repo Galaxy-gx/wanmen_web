@@ -4,25 +4,22 @@
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_bootstrap import Bootstrap
-from flask_caching import Cache
 from models import *
 import config
 import common
-import sms
+from sms import cache, passport
 import datetime
 from urllib.parse import urlsplit, parse_qs
 from collections import OrderedDict
 
-
 app = Flask(__name__)
-cache = Cache(config={'CACHE_TYPE': 'simple'})
-cache.init_app(app)
+cache.init_app(app, config={'CACHE_TYPE': 'simple'})
 app.secret_key = config.app_config.get('SECRET_KEY')
 Bootstrap(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-sms = sms.passport()
+sms = passport()
 
 
 @app.route('/')

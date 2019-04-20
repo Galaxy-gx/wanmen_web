@@ -5,10 +5,10 @@ import requests
 import re
 from user_agent import generate_user_agent
 from flask_caching import Cache
-cache = Cache(config={'CACHE_TYPE': 'simple'})
+cache = Cache()
 
 
-class passport:
+class passport(cache):
     ua = generate_user_agent()
 
     def seccode(self, mobile, rand_num):
