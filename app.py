@@ -4,6 +4,7 @@
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_bootstrap import Bootstrap
+from flask_caching import Cache
 from models import *
 import config
 import common
@@ -12,7 +13,10 @@ import datetime
 from urllib.parse import urlsplit, parse_qs
 from collections import OrderedDict
 
+
+cache = Cache(config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_user_cache', 'CACHE_DEFAULT_TIMEOUT': 120})
 app = Flask(__name__)
+cache.init_app(app)
 app.secret_key = config.app_config.get('SECRET_KEY')
 Bootstrap(app)
 login_manager = LoginManager()
@@ -24,6 +28,7 @@ sms = sms.passport()
 @app.route('/')
 @app.route('/list/', defaults={'page': 1})
 @app.route('/list/page/<int:page>', methods=['GET'])
+@cache.memoize(timeout=120)
 @login_required
 def get_list(page=1):
     model = all_courses_table()
@@ -47,6 +52,7 @@ def get_list(page=1):
 
 
 @app.route('/detail/<path:url_info>', methods=['GET'])
+@cache.memoize(timeout=120)
 @login_required
 def get_detail(url_info):
     children_id = ''
@@ -83,6 +89,7 @@ def get_detail(url_info):
 
 
 @app.route('/media/<children_id>', methods=['GET'])
+@cache.memoize(timeout=120)
 @login_required
 def get_media(children_id):
     m3u8_data = m3u8_data_table().collection.find_one({'_id': children_id}, {"children_m3u8": 1})
@@ -155,7 +162,7 @@ def logout():
 def seccode():
     rand_num = request.args.get('rand_num', '')
     mobile = request.args.get('mobile', '')
-    return Response(sms.seccode(mobile,rand_num), content_type='image/png')
+    return Response(sms.seccode(mobile, rand_num), content_type='image/png')
 
 
 @login_manager.user_loader
