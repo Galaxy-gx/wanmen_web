@@ -25,7 +25,6 @@ sms = passport()
 @app.route('/')
 @app.route('/list/', defaults={'page': 1})
 @app.route('/list/page/<int:page>', methods=['GET'])
-@cache.memoize(timeout=120)
 @login_required
 def get_list(page=1):
     model = all_courses_table()
@@ -49,7 +48,6 @@ def get_list(page=1):
 
 
 @app.route('/detail/<path:url_info>', methods=['GET'])
-@cache.memoize(timeout=120)
 @login_required
 def get_detail(url_info):
     children_id = ''
@@ -86,7 +84,6 @@ def get_detail(url_info):
 
 
 @app.route('/media/<children_id>', methods=['GET'])
-@cache.memoize(timeout=120)
 @login_required
 def get_media(children_id):
     m3u8_data = m3u8_data_table().collection.find_one({'_id': children_id}, {"children_m3u8": 1})
