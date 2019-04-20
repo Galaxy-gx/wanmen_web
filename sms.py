@@ -5,7 +5,7 @@ import requests
 import re
 from user_agent import generate_user_agent
 from flask_caching import Cache
-
+cache = Cache()
 
 class passport:
     ua = generate_user_agent()
@@ -26,12 +26,12 @@ class passport:
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        Cache.set(mobile, arr[0])
+        cache.set(mobile, arr[0])
         print(mobile,arr[0])
         return content.content
 
     def send_sms(self, mobile, code):
-        PHPSESSID = Cache.get(mobile)
+        PHPSESSID = cache.get(mobile)
         print(PHPSESSID)
         headers = {
             'Host': 'passport.9you.com',
@@ -53,7 +53,7 @@ class passport:
         # return int(content.get('ret')), content.get('msg')
 
     def verfiy_sms(self, mobile, sms):
-        PHPSESSID = Cache.get(mobile)
+        PHPSESSID = cache.get(mobile)
         headers = {
             'Host': 'passport.9you.com',
             'Connection': 'keep-alive',
