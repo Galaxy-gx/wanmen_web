@@ -5,7 +5,7 @@ import requests
 import re
 from user_agent import generate_user_agent
 from flask_caching import Cache
-cache = Cache()
+cache = Cache(config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_user_cache', 'CACHE_DEFAULT_TIMEOUT': 120})
 
 class passport:
     ua = generate_user_agent()
