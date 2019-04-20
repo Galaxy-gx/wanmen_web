@@ -14,8 +14,8 @@ from urllib.parse import urlsplit, parse_qs
 from collections import OrderedDict
 
 
-cache = Cache(config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_user_cache', 'CACHE_DEFAULT_TIMEOUT': 120})
 app = Flask(__name__)
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 cache.init_app(app)
 app.secret_key = config.app_config.get('SECRET_KEY')
 Bootstrap(app)

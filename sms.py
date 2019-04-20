@@ -5,7 +5,8 @@ import requests
 import re
 from user_agent import generate_user_agent
 from flask_caching import Cache
-cache = Cache(config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_user_cache', 'CACHE_DEFAULT_TIMEOUT': 120})
+cache = Cache(config={'CACHE_TYPE': 'simple'})
+
 
 class passport:
     ua = generate_user_agent()
@@ -27,7 +28,7 @@ class passport:
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
         cache.set(mobile, arr[0])
-        print(mobile,arr[0])
+        print(mobile, arr[0])
         return content.content
 
     def send_sms(self, mobile, code):
