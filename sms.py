@@ -5,6 +5,7 @@ import requests
 import re
 from user_agent import generate_user_agent
 from flask_caching import Cache
+from flask import request as flask_request
 
 cache = Cache()
 
@@ -12,7 +13,7 @@ cache = Cache()
 class passport():
     ua = generate_user_agent()
 
-    def seccode(self, mobile, rand_num):
+    def seccode(self, rand_num):
         headers = {
             'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -28,13 +29,13 @@ class passport():
         suffix = '?' + str(rand_num) if rand_num else ''
         content = requests.post('https://passport.9you.com/seccode.php' + suffix, headers=headers)
         arr = re.findall('PHPSESSID\=([^\;].*)\;.*', content.headers['Set-Cookie'])
-        cache.set(mobile, arr[0])
-        print(mobile, arr[0])
+        session_id = flask_request.headers.get('Cookie').split("=", 1)[1]
+        cache.set(session_id, arr[0])
         return content.content
 
     def send_sms(self, mobile, code):
-        PHPSESSID = cache.get(mobile)
-        print(PHPSESSID)
+        session_id = flask_request.headers.get('Cookie').split("=", 1)[1]
+        PHPSESSID = cache.get(session_id)
         headers = {
             'Host': 'passport.9you.com',
             'Origin': 'https://passport.9you.com',
@@ -45,17 +46,18 @@ class passport():
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Cache-Control': 'no-cache',
             'X-Requested-With': 'XMLHttpRequest',
-            'Cookie': 'PHPSESSID=' + PHPSESSID,
+            'Cookie': 'PHPSESSID=' + str(PHPSESSID),
             'Connection': 'keep-alive',
             'Referer': 'https://passport.9you.com/mobile_regist.php',
         }
         d = {"mobile": mobile, "dataType": "json", "type": "regist", "checkcode": code}
-        # content = requests.post('https://passport.9you.com/sendmobilecode.php', data=d, headers=headers).json()
-        return int(4), ''
-        # return int(content.get('ret')), content.get('msg')
+        content = requests.post('https://passport.9you.com/sendmobilecode.php', data=d, headers=headers).json()
+        # return int(4), ''
+        return int(content.get('ret')), content.get('msg')
 
     def verfiy_sms(self, mobile, sms):
-        PHPSESSID = cache.get(mobile)
+        session_id = flask_request.headers.get('Cookie').split("=", 1)[1]
+        PHPSESSID = cache.get(session_id)
         headers = {
             'Host': 'passport.9you.com',
             'Connection': 'keep-alive',
@@ -69,7 +71,7 @@ class passport():
             'Referer': 'https://passport.9you.com/mobile_regist.php',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Cookie': 'PHPSESSID=' + PHPSESSID,
+            'Cookie': 'PHPSESSID=' + str(PHPSESSID),
         }
 
         d = {"username": mobile, "password": "fKWKWd2m2nrMXQf", "code": sms, "realname": '%E7%A8%8B%E5%85%86%E7%A5%A5',
