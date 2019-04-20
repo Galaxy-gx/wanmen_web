@@ -13,7 +13,7 @@ from urllib.parse import urlsplit, parse_qs
 from collections import OrderedDict
 
 app = Flask(__name__)
-cache.init_app(app, config={'CACHE_TYPE': 'simple'})
+cache.init_app(app, config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_uesr'})
 app.secret_key = config.app_config.get('SECRET_KEY')
 Bootstrap(app)
 login_manager = LoginManager()
