@@ -24,7 +24,7 @@ $(function(){
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 video.play();
             });
-            $('#playback_rate').val($('video').playbackRate)
+            $('#playback_rate').text(document.querySelector('video').playbackRate)
         }
     }
 
@@ -40,13 +40,13 @@ $(function(){
 
 
     $('.add_rate').click(function () {
-        $('video').playbackRate += 0.25
-        $('#playback_rate').val($('video').playbackRate)
+        document.querySelector('video').playbackRate += 0.25
+        $('#playback_rate').text(document.querySelector('video').playbackRate)
     })
 
     $('.del_rate').click(function () {
-        $('video').playbackRate -= 0.25
-        $('#playback_rate').val($('video').playbackRate)
+        document.querySelector('video').playbackRate -= 0.25
+        $('#playback_rate').text(document.querySelector('video').playbackRate)
     })
 
 });
