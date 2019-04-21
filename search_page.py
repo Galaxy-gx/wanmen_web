@@ -179,10 +179,10 @@ while flag:
             collection.insert_one(course)
             create_num = create_num + 1
         else:
-            if response[i].get('videoCount') == db_item.get('videoCount'):
+            if int(response[i].get('videoCount')) == int(db_item.get('videoCount')):
                 tmp_str = 'continue'
                 continue_num = continue_num + 1
-            elif response[i].get('videoCount') > db_item.get('videoCount'):
+            elif int(response[i].get('videoCount')) > int(db_item.get('videoCount')):
                 # 更新源ts视频url
                 tmp_str = 'update'
                 downloadAction = get_lectures_data(_id, class_name, response)
