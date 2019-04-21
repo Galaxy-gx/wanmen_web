@@ -24,6 +24,7 @@ $(function(){
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 video.play();
             });
+            $('#playback_rate').val($('video').playbackRate)
         }
     }
 
@@ -36,4 +37,16 @@ $(function(){
         children_url = '/detail/' + $(this).data('class_id') + '/children_id/' + this.id
         window.history.pushState(null, '', children_url)
     });
+
+
+    $('.add_rate').click(function () {
+        $('video').playbackRate += 0.25
+        $('#playback_rate').val($('video').playbackRate)
+    })
+
+    $('.del_rate').click(function () {
+        $('video').playbackRate -= 0.25
+        $('#playback_rate').val($('video').playbackRate)
+    })
+
 });
