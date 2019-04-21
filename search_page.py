@@ -13,7 +13,6 @@ import re
 from multiprocessing import Process, Queue, Pool, Manager
 import config
 
-
 pattern = '.+\.ts'
 
 ua = generate_user_agent()
@@ -45,7 +44,7 @@ def format_data(data, downloadAction):
         'tag': data.get('tag', '').split() if isinstance(data.get('tag'), str) else '',
         'status': data.get('status'),
         'bigImage': data.get('bigImage'),
-        'videoCount': data.get('videoCount'),
+        'videoCount': data.get('videoCount') if data.get('videoCount', '') else 0,
         'description': data.get('description'),
         'teacherName': data.get('teacherName'),
         'teacherAvatar': data.get('teacherAvatar'),
@@ -179,10 +178,22 @@ while flag:
             collection.insert_one(course)
             create_num = create_num + 1
         else:
-            if int(response[i].get('videoCount')) == int(db_item.get('videoCount')):
+            response_videoCount = 0
+            db_item_videoCount = 0
+            if response[i].get('videoCount') == 'None' or response[i].get('videoCount') == None:
+                response_videoCount = 0
+            else:
+                response_videoCount = int(response[i].get('videoCount'))
+
+            if db_item.get('videoCount') == 'None' or db_item.get('videoCount') == None:
+                db_item_videoCount = 0
+            else:
+                db_item_videoCount = int(db_item.get('videoCount',0))
+
+            if response_videoCount == db_item_videoCount:
                 tmp_str = 'continue'
                 continue_num = continue_num + 1
-            elif int(response[i].get('videoCount')) > int(db_item.get('videoCount')):
+            elif response_videoCount > db_item_videoCount:
                 # 更新源ts视频url
                 tmp_str = 'update'
                 downloadAction = get_lectures_data(_id, class_name, response)
@@ -190,7 +201,7 @@ while flag:
                 collection.update_one({'_id': _id}, update_data(course))
                 update_num = update_num + 1
             else:
-                tmp_str = '%s error %s/%s' % (class_name, response[i].get('videoCount'), db_item.get('videoCount'))
+                tmp_str = '%s error %s/%s' % (class_name, response_videoCount, db_item_videoCount)
 
         total = total + 1
         print('%s %s page:%d current:%d %s' % (
