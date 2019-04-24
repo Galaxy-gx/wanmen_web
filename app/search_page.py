@@ -32,6 +32,29 @@ manager = Manager()
 queue = manager.Queue()
 
 
+def get_lectures_data(class_id, class_name, response):
+    downloadAction = 1
+    courses_url = "https://api.wanmen.org/4.0/content/courses/" + \
+        response[i]['id']
+    courses_data = get_courses_data(courses_url)
+
+    for n in range(len(courses_data)):
+        num = str(n + 1)
+        print(
+            "%s %s %s/%d count:%d" % (
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()
+                              ), class_name, num, len(courses_data),
+                len(courses_data[n]['children'])))
+        lectures_id = courses_data[n]['id']
+        lectures_name = num + '_' + \
+            courses_data[n]['name'].replace('/', '').replace('_', '')
+
+        downloadAction, children_data = get_children_data(num, courses_data[n]['children'], class_id, class_name,
+                                                          lectures_id, lectures_name)
+
+    return downloadAction
+
+
 def get_children_data(num, data, class_id, class_name, lectures_id, lectures_name):
     process_count = 10
     children = {}
@@ -86,55 +109,6 @@ def process_get_item_ts(q, id, url):
     q.put([id, m3u8_url, method, ts_data])
 
 
-def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
-    course = {
-        '_id': id,
-        'class_id': class_id,
-        'name': class_name,
-        'lectures_id': lectures_id,
-        'lectures_name': lectures_name,
-        'children_name': data[id].get('name'),
-        'children_m3u8': data[id].get('video_ts')
-    }
-    return course
-
-
-def update_data(data):
-    del data['_id']
-    del data['createdAt']
-    del data['downloadCount']
-    course = {"$set": data}
-    return course
-
-
-def get_courses_data(url):
-    response = requests.get(url, timeout=30, headers=headers).json()
-    return response['lectures']
-
-
-def get_lectures_data(class_id, class_name, response):
-    downloadAction = 1
-    courses_url = "https://api.wanmen.org/4.0/content/courses/" + \
-        response[i]['id']
-    courses_data = get_courses_data(courses_url)
-
-    for n in range(len(courses_data)):
-        num = str(n + 1)
-        print(
-            "%s %s %s/%d count:%d" % (
-                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()
-                              ), class_name, num, len(courses_data),
-                len(courses_data[n]['children'])))
-        lectures_id = courses_data[n]['id']
-        lectures_name = num + '_' + \
-            courses_data[n]['name'].replace('/', '').replace('_', '')
-
-        downloadAction, children_data = get_children_data(num, courses_data[n]['children'], class_id, class_name,
-                                                          lectures_id, lectures_name)
-
-    return downloadAction
-
-
 def format_data(data, downloadAction):
     course = {
         '_id': data.get('id'),
@@ -153,6 +127,32 @@ def format_data(data, downloadAction):
         'teacherAvatar': data.get('teacherAvatar'),
         'downloadAction': downloadAction,
         'downloadCount': 0
+    }
+    return course
+
+
+def get_courses_data(url):
+    response = requests.get(url, timeout=30, headers=headers).json()
+    return response['lectures']
+
+
+def update_data(data):
+    del data['_id']
+    del data['createdAt']
+    del data['downloadCount']
+    course = {"$set": data}
+    return course
+
+
+def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
+    course = {
+        '_id': id,
+        'class_id': class_id,
+        'name': class_name,
+        'lectures_id': lectures_id,
+        'lectures_name': lectures_name,
+        'children_name': data[id].get('name'),
+        'children_m3u8': data[id].get('video_ts')
     }
     return course
 
