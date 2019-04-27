@@ -32,41 +32,6 @@ manager = Manager()
 queue = manager.Queue()
 
 
-def format_data(data, downloadAction):
-    course = {
-        '_id': data.get('id'),
-        'name': data.get('name').replace('/', '').replace('_', ''),
-        'createdAt': parse(data.get('createdAt')),
-        'updatedAt': parse(data.get('updatedAt')),
-        'finishedAt': 0 if data.get('finishedAt', 0) == 0 else parse(data.get('finishedAt')),
-        'price': data.get('price'),
-        'likes': data.get('likes', 0),
-        'tag': data.get('tag', '').split() if isinstance(data.get('tag'), str) else '',
-        'status': data.get('status'),
-        'bigImage': data.get('bigImage'),
-        'videoCount': data.get('videoCount') if data.get('videoCount', '') else 0,
-        'description': data.get('description'),
-        'teacherName': data.get('teacherName'),
-        'teacherAvatar': data.get('teacherAvatar'),
-        'downloadAction': downloadAction,
-        'downloadCount': 0
-    }
-    return course
-
-
-def update_data(data):
-    del data['_id']
-    del data['createdAt']
-    del data['downloadCount']
-    course = {"$set": data}
-    return course
-
-
-def get_courses_data(url):
-    response = requests.get(url, timeout=30, headers=headers).json()
-    return response['lectures']
-
-
 def get_children_data(num, data, class_id, class_name, lectures_id, lectures_name):
     process_count = 10
     children = {}
@@ -108,17 +73,9 @@ def get_children_data(num, data, class_id, class_name, lectures_id, lectures_nam
     return flag, children
 
 
-def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
-    course = {
-        '_id': id,
-        'class_id': class_id,
-        'name': class_name,
-        'lectures_id': lectures_id,
-        'lectures_name': lectures_name,
-        'children_name': data[id].get('name'),
-        'children_m3u8': data[id].get('video_ts')
-    }
-    return course
+def get_courses_data(url):
+    response = requests.get(url, timeout=30, headers=headers).json()
+    return response['lectures']
 
 
 def process_get_item_ts(q, id, url):
@@ -132,6 +89,49 @@ def process_get_item_ts(q, id, url):
         m3u8_url = response['video']['hls']['pcMid']
         ts_data = requests.get(m3u8_url, timeout=30, headers=headers).content
     q.put([id, m3u8_url, method, ts_data])
+
+
+def update_data(data):
+    del data['_id']
+    del data['createdAt']
+    del data['downloadCount']
+    course = {"$set": data}
+    return course
+
+
+def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
+    course = {
+        '_id': id,
+        'class_id': class_id,
+        'name': class_name,
+        'lectures_id': lectures_id,
+        'lectures_name': lectures_name,
+        'children_name': data[id].get('name'),
+        'children_m3u8': data[id].get('video_ts')
+    }
+    return course
+
+
+def format_data(data, downloadAction):
+    course = {
+        '_id': data.get('id'),
+        'name': data.get('name').replace('/', '').replace('_', ''),
+        'createdAt': parse(data.get('createdAt')),
+        'updatedAt': parse(data.get('updatedAt')),
+        'finishedAt': 0 if data.get('finishedAt', 0) == 0 else parse(data.get('finishedAt')),
+        'price': data.get('price'),
+        'likes': data.get('likes', 0),
+        'tag': data.get('tag', '').split() if isinstance(data.get('tag'), str) else '',
+        'status': data.get('status'),
+        'bigImage': data.get('bigImage'),
+        'videoCount': data.get('videoCount') if data.get('videoCount', '') else 0,
+        'description': data.get('description'),
+        'teacherName': data.get('teacherName'),
+        'teacherAvatar': data.get('teacherAvatar'),
+        'downloadAction': downloadAction,
+        'downloadCount': 0
+    }
+    return course
 
 
 def get_lectures_data(class_id, class_name, response):
