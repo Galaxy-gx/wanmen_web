@@ -32,17 +32,40 @@ manager = Manager()
 queue = manager.Queue()
 
 
-def process_get_item_ts(q, id, url):
-    response = requests.get(url, timeout=30, headers=headers).json()
-    ts_data = ''
-    if response.get('video', '') == '' or response['video'].get('hls', '') == '':
-        method = 0
-        m3u8_url = ''
-    else:
-        method = 1
-        m3u8_url = response['video']['hls']['pcMid']
-        ts_data = requests.get(m3u8_url, timeout=30, headers=headers).content
-    q.put([id, m3u8_url, method, ts_data])
+def get_lectures_data(class_id, class_name, response):
+    downloadAction = 1
+    courses_url = "https://api.wanmen.org/4.0/content/courses/" + \
+        response[i]['id']
+    courses_data = get_courses_data(courses_url)
+
+    for n in range(len(courses_data)):
+        num = str(n + 1)
+        print(
+            "%s %s %s/%d count:%d" % (
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()
+                              ), class_name, num, len(courses_data),
+                len(courses_data[n]['children'])))
+        lectures_id = courses_data[n]['id']
+        lectures_name = num + '_' + \
+            courses_data[n]['name'].replace('/', '').replace('_', '')
+
+        downloadAction, children_data = get_children_data(num, courses_data[n]['children'], class_id, class_name,
+                                                          lectures_id, lectures_name)
+
+    return downloadAction
+
+
+def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
+    course = {
+        '_id': id,
+        'class_id': class_id,
+        'name': class_name,
+        'lectures_id': lectures_id,
+        'lectures_name': lectures_name,
+        'children_name': data[id].get('name'),
+        'children_m3u8': data[id].get('video_ts')
+    }
+    return course
 
 
 def update_data(data):
@@ -121,40 +144,17 @@ def format_data(data, downloadAction):
     return course
 
 
-def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
-    course = {
-        '_id': id,
-        'class_id': class_id,
-        'name': class_name,
-        'lectures_id': lectures_id,
-        'lectures_name': lectures_name,
-        'children_name': data[id].get('name'),
-        'children_m3u8': data[id].get('video_ts')
-    }
-    return course
-
-
-def get_lectures_data(class_id, class_name, response):
-    downloadAction = 1
-    courses_url = "https://api.wanmen.org/4.0/content/courses/" + \
-        response[i]['id']
-    courses_data = get_courses_data(courses_url)
-
-    for n in range(len(courses_data)):
-        num = str(n + 1)
-        print(
-            "%s %s %s/%d count:%d" % (
-                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()
-                              ), class_name, num, len(courses_data),
-                len(courses_data[n]['children'])))
-        lectures_id = courses_data[n]['id']
-        lectures_name = num + '_' + \
-            courses_data[n]['name'].replace('/', '').replace('_', '')
-
-        downloadAction, children_data = get_children_data(num, courses_data[n]['children'], class_id, class_name,
-                                                          lectures_id, lectures_name)
-
-    return downloadAction
+def process_get_item_ts(q, id, url):
+    response = requests.get(url, timeout=30, headers=headers).json()
+    ts_data = ''
+    if response.get('video', '') == '' or response['video'].get('hls', '') == '':
+        method = 0
+        m3u8_url = ''
+    else:
+        method = 1
+        m3u8_url = response['video']['hls']['pcMid']
+        ts_data = requests.get(m3u8_url, timeout=30, headers=headers).content
+    q.put([id, m3u8_url, method, ts_data])
 
 
 flag = True
