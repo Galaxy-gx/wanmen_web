@@ -45,19 +45,6 @@ def process_get_item_ts(q, id, url):
     q.put([id, m3u8_url, method, ts_data])
 
 
-def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
-    course = {
-        '_id': id,
-        'class_id': class_id,
-        'name': class_name,
-        'lectures_id': lectures_id,
-        'lectures_name': lectures_name,
-        'children_name': data[id].get('name'),
-        'children_m3u8': data[id].get('video_ts')
-    }
-    return course
-
-
 def get_courses_data(url):
     response = requests.get(url, timeout=30, headers=headers).json()
     return response['lectures']
@@ -130,6 +117,19 @@ def format_data(data, downloadAction):
         'teacherAvatar': data.get('teacherAvatar'),
         'downloadAction': downloadAction,
         'downloadCount': 0
+    }
+    return course
+
+
+def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
+    course = {
+        '_id': id,
+        'class_id': class_id,
+        'name': class_name,
+        'lectures_id': lectures_id,
+        'lectures_name': lectures_name,
+        'children_name': data[id].get('name'),
+        'children_m3u8': data[id].get('video_ts')
     }
     return course
 
