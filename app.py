@@ -1,16 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from flask import Flask, Response, request, render_template, redirect, url_for
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from flask_bootstrap import Bootstrap
-from models import *
-import config
-import common
-from sms import cache, passport
 import datetime
 from urllib.parse import urlsplit, parse_qs
 from collections import OrderedDict
+from .models import *
+import common
+from sms import cache, passport
+from flask import Flask, Response, request, render_template, redirect, url_for
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
+from flask_bootstrap import Bootstrap
+import config
 
 app = Flask(__name__)
 cache.init_app(app, config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_user'})
@@ -112,7 +112,7 @@ def login():
 
         if login_flag:
             model = User(mobile)
-            if config.app_config.get('OPEN_REGISTER'):
+            if config.app_config.get('OPEN_REGISTER') == '1':
                 model.insert_user()
             model.login_log(request)
             user_json = model.find_user()
