@@ -32,16 +32,11 @@ manager = Manager()
 queue = manager.Queue()
 
 
-def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
-    course = {
-        '_id': id,
-        'class_id': class_id,
-        'name': class_name,
-        'lectures_id': lectures_id,
-        'lectures_name': lectures_name,
-        'children_name': data[id].get('name'),
-        'children_m3u8': data[id].get('video_ts')
-    }
+def update_data(data):
+    del data['_id']
+    del data['createdAt']
+    del data['downloadCount']
+    course = {"$set": data}
     return course
 
 
@@ -67,17 +62,22 @@ def format_data(data, downloadAction):
     return course
 
 
+def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
+    course = {
+        '_id': id,
+        'class_id': class_id,
+        'name': class_name,
+        'lectures_id': lectures_id,
+        'lectures_name': lectures_name,
+        'children_name': data[id].get('name'),
+        'children_m3u8': data[id].get('video_ts')
+    }
+    return course
+
+
 def get_courses_data(url):
     response = requests.get(url, timeout=30, headers=headers).json()
     return response['lectures']
-
-
-def update_data(data):
-    del data['_id']
-    del data['createdAt']
-    del data['downloadCount']
-    course = {"$set": data}
-    return course
 
 
 def get_lectures_data(class_id, class_name, response):
