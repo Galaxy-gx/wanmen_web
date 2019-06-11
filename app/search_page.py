@@ -77,6 +77,19 @@ def get_lectures_data(class_id, class_name, response):
     return downloadAction
 
 
+def get_courses_data(url):
+    response = requests.get(url, timeout=30, headers=headers).json()
+    return response['lectures']
+
+
+def update_data(data):
+    del data['_id']
+    del data['createdAt']
+    del data['downloadCount']
+    course = {"$set": data}
+    return course
+
+
 def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
     course = {
         '_id': id,
@@ -87,14 +100,6 @@ def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name)
         'children_name': data[id].get('name'),
         'children_m3u8': data[id].get('video_ts')
     }
-    return course
-
-
-def update_data(data):
-    del data['_id']
-    del data['createdAt']
-    del data['downloadCount']
-    course = {"$set": data}
     return course
 
 
@@ -137,11 +142,6 @@ def get_children_data(num, data, class_id, class_name, lectures_id, lectures_nam
                     m3u8_format_data(key, children, class_id, class_name, lectures_id, lectures_name))
 
     return flag, children
-
-
-def get_courses_data(url):
-    response = requests.get(url, timeout=30, headers=headers).json()
-    return response['lectures']
 
 
 def process_get_item_ts(q, id, url):
