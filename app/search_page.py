@@ -32,6 +32,11 @@ manager = Manager()
 queue = manager.Queue()
 
 
+def get_courses_data(url):
+    response = requests.get(url, timeout=30, headers=headers).json()
+    return response['lectures']
+
+
 def format_data(data, downloadAction):
     course = {
         '_id': data.get('id'),
@@ -50,6 +55,19 @@ def format_data(data, downloadAction):
         'teacherAvatar': data.get('teacherAvatar'),
         'downloadAction': downloadAction,
         'downloadCount': 0
+    }
+    return course
+
+
+def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
+    course = {
+        '_id': id,
+        'class_id': class_id,
+        'name': class_name,
+        'lectures_id': lectures_id,
+        'lectures_name': lectures_name,
+        'children_name': data[id].get('name'),
+        'children_m3u8': data[id].get('video_ts')
     }
     return course
 
@@ -77,11 +95,6 @@ def get_lectures_data(class_id, class_name, response):
     return downloadAction
 
 
-def get_courses_data(url):
-    response = requests.get(url, timeout=30, headers=headers).json()
-    return response['lectures']
-
-
 def update_data(data):
     del data['_id']
     del data['createdAt']
@@ -90,17 +103,17 @@ def update_data(data):
     return course
 
 
-def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name):
-    course = {
-        '_id': id,
-        'class_id': class_id,
-        'name': class_name,
-        'lectures_id': lectures_id,
-        'lectures_name': lectures_name,
-        'children_name': data[id].get('name'),
-        'children_m3u8': data[id].get('video_ts')
-    }
-    return course
+def process_get_item_ts(q, id, url):
+    response = requests.get(url, timeout=30, headers=headers).json()
+    ts_data = ''
+    if response.get('video', '') == '' or response['video'].get('hls', '') == '':
+        method = 0
+        m3u8_url = ''
+    else:
+        method = 1
+        m3u8_url = response['video']['hls']['pcMid']
+        ts_data = requests.get(m3u8_url, timeout=30, headers=headers).content
+    q.put([id, m3u8_url, method, ts_data])
 
 
 def get_children_data(num, data, class_id, class_name, lectures_id, lectures_name):
@@ -142,19 +155,6 @@ def get_children_data(num, data, class_id, class_name, lectures_id, lectures_nam
                     m3u8_format_data(key, children, class_id, class_name, lectures_id, lectures_name))
 
     return flag, children
-
-
-def process_get_item_ts(q, id, url):
-    response = requests.get(url, timeout=30, headers=headers).json()
-    ts_data = ''
-    if response.get('video', '') == '' or response['video'].get('hls', '') == '':
-        method = 0
-        m3u8_url = ''
-    else:
-        method = 1
-        m3u8_url = response['video']['hls']['pcMid']
-        ts_data = requests.get(m3u8_url, timeout=30, headers=headers).content
-    q.put([id, m3u8_url, method, ts_data])
 
 
 flag = True
