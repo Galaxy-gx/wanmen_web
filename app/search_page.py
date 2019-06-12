@@ -32,6 +32,47 @@ manager = Manager()
 queue = manager.Queue()
 
 
+def get_children_data(num, data, class_id, class_name, lectures_id, lectures_name):
+    process_count = 10
+    children = {}
+    flag = 1
+    cut_data = [data[i:i + process_count]
+                for i in range(0, len(data), process_count)]
+    for i in range(len(cut_data)):
+        p = Pool(process_count)
+        for k in range(len(cut_data[i])):
+            prefix = "%s.%d_" % (num, i * process_count + k + 1)
+            children_id = cut_data[i][k]['id']
+            children_name = prefix + \
+                cut_data[i][k]['name'].replace('/', '').replace('_', '')
+            children[children_id] = {}
+            children[children_id]['name'] = children_name
+            children[children_id]['hls_url'] = ''
+            children[children_id]['method'] = 0
+            children[children_id]['video_ts'] = ''
+            p.apply_async(process_get_item_ts, args=(
+                queue, children_id, lectures_url + children_id))
+
+        p.close()
+        p.join()
+
+        while not queue.empty():
+            item = queue.get()
+            key = item[0]
+            val = item[1]
+            method = item[2]
+            flag = method
+            ts = item[3]
+            children[key]['hls_url'] = val
+            children[key]['method'] = method
+            children[key]['video_ts'] = ts
+            if not collection_m3u8.find_one({'_id': key}):
+                collection_m3u8.insert_one(
+                    m3u8_format_data(key, children, class_id, class_name, lectures_id, lectures_name))
+
+    return flag, children
+
+
 def get_courses_data(url):
     response = requests.get(url, timeout=30, headers=headers).json()
     return response['lectures']
@@ -72,6 +113,14 @@ def m3u8_format_data(id, data, class_id, class_name, lectures_id, lectures_name)
     return course
 
 
+def update_data(data):
+    del data['_id']
+    del data['createdAt']
+    del data['downloadCount']
+    course = {"$set": data}
+    return course
+
+
 def get_lectures_data(class_id, class_name, response):
     downloadAction = 1
     courses_url = "https://api.wanmen.org/4.0/content/courses/" + \
@@ -95,14 +144,6 @@ def get_lectures_data(class_id, class_name, response):
     return downloadAction
 
 
-def update_data(data):
-    del data['_id']
-    del data['createdAt']
-    del data['downloadCount']
-    course = {"$set": data}
-    return course
-
-
 def process_get_item_ts(q, id, url):
     response = requests.get(url, timeout=30, headers=headers).json()
     ts_data = ''
@@ -114,47 +155,6 @@ def process_get_item_ts(q, id, url):
         m3u8_url = response['video']['hls']['pcMid']
         ts_data = requests.get(m3u8_url, timeout=30, headers=headers).content
     q.put([id, m3u8_url, method, ts_data])
-
-
-def get_children_data(num, data, class_id, class_name, lectures_id, lectures_name):
-    process_count = 10
-    children = {}
-    flag = 1
-    cut_data = [data[i:i + process_count]
-                for i in range(0, len(data), process_count)]
-    for i in range(len(cut_data)):
-        p = Pool(process_count)
-        for k in range(len(cut_data[i])):
-            prefix = "%s.%d_" % (num, i * process_count + k + 1)
-            children_id = cut_data[i][k]['id']
-            children_name = prefix + \
-                cut_data[i][k]['name'].replace('/', '').replace('_', '')
-            children[children_id] = {}
-            children[children_id]['name'] = children_name
-            children[children_id]['hls_url'] = ''
-            children[children_id]['method'] = 0
-            children[children_id]['video_ts'] = ''
-            p.apply_async(process_get_item_ts, args=(
-                queue, children_id, lectures_url + children_id))
-
-        p.close()
-        p.join()
-
-        while not queue.empty():
-            item = queue.get()
-            key = item[0]
-            val = item[1]
-            method = item[2]
-            flag = method
-            ts = item[3]
-            children[key]['hls_url'] = val
-            children[key]['method'] = method
-            children[key]['video_ts'] = ts
-            if not collection_m3u8.find_one({'_id': key}):
-                collection_m3u8.insert_one(
-                    m3u8_format_data(key, children, class_id, class_name, lectures_id, lectures_name))
-
-    return flag, children
 
 
 flag = True
