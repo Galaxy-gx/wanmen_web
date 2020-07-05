@@ -4,7 +4,7 @@
 import datetime
 from urllib.parse import urlsplit, parse_qs
 from collections import OrderedDict
-from .models import *
+import models
 import common
 from sms import cache, passport
 from flask import Flask, Response, request, render_template, redirect, url_for
@@ -13,7 +13,7 @@ from flask_bootstrap import Bootstrap
 import config
 
 app = Flask(__name__)
-cache.init_app(app, config={'CACHE_TYPE': 'uwsgi', 'CACHE_UWSGI_NAME': 'media_user'})
+cache.init_app(app, config={'CACHE_TYPE': 'simple'})
 app.secret_key = config.app_config.get('SECRET_KEY')
 Bootstrap(app)
 login_manager = LoginManager()
