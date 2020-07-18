@@ -6,5 +6,5 @@ Flask-Caching==1.9.0
 Flask-Login==0.5.0
 python-dotenv==0.14.0
 pymongo==3.10.1
-requests==2.19.1
+requests==2.20.0
 user-agent==0.1.9
